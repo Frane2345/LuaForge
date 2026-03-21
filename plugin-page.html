@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>BloxFR AI Plugin — Roblox Studio</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Syne:wght@400;600;800&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:#060d1f;color:#e8eaf0;font-family:'Syne',sans-serif;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(27,111,232,0.05) 1px,transparent 1px),linear-gradient(90deg,rgba(27,111,232,0.05) 1px,transparent 1px);background-size:50px 50px;pointer-events:none;z-index:0;}
+
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:18px 60px;background:rgba(6,13,31,0.95);backdrop-filter:blur(20px);border-bottom:1px solid rgba(27,111,232,0.15);}
+.logo{font-family:'Orbitron',monospace;font-weight:900;font-size:1.2rem;}
+.logo span{color:#1b6fe8;}
+.nav-links{display:flex;gap:36px;list-style:none;}
+.nav-links a{color:#6b7280;text-decoration:none;font-size:0.82rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;transition:color 0.2s;}
+.nav-links a:hover{color:#1b6fe8;}
+.nav-cta{background:#1b6fe8!important;color:white!important;padding:10px 22px;border-radius:6px;}
+
+.hero{position:relative;min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:120px 40px 80px;z-index:2;overflow:hidden;}
+.hero-glow{position:absolute;width:600px;height:600px;background:radial-gradient(circle,rgba(27,111,232,0.12) 0%,transparent 70%);top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(27,111,232,0.1);border:1px solid rgba(27,111,232,0.3);padding:6px 18px;border-radius:100px;font-size:0.72rem;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:#47a3ff;margin-bottom:28px;}
+.badge-dot{width:6px;height:6px;background:#1b6fe8;border-radius:50%;animation:blink 1.5s ease-in-out infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+.hero h1{font-family:'Orbitron',monospace;font-size:clamp(2.5rem,5.5vw,4.5rem);font-weight:900;line-height:1.05;margin-bottom:20px;}
+.hero h1 span{color:#1b6fe8;}
+.hero p{font-size:1.1rem;color:#6b7280;line-height:1.7;max-width:580px;margin:0 auto 40px;}
+.hero-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;}
+.btn-primary{background:#1b6fe8;color:white;padding:16px 36px;border-radius:6px;text-decoration:none;font-weight:700;font-size:0.9rem;letter-spacing:0.08em;text-transform:uppercase;transition:all 0.2s;display:inline-block;}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(27,111,232,0.4);}
+.btn-secondary{background:transparent;color:#e8eaf0;padding:16px 36px;border-radius:6px;text-decoration:none;font-weight:700;font-size:0.9rem;letter-spacing:0.08em;text-transform:uppercase;border:2px solid rgba(255,255,255,0.15);transition:all 0.2s;display:inline-block;}
+.btn-secondary:hover{border-color:#1b6fe8;color:#1b6fe8;}
+
+/* PLUGIN PREVIEW */
+.preview{position:relative;z-index:2;padding:80px 60px;background:#08111e;}
+.preview-inner{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;}
+.preview-text h2{font-family:'Orbitron',monospace;font-size:2rem;font-weight:900;margin-bottom:16px;}
+.preview-text h2 span{color:#1b6fe8;}
+.preview-text p{color:#6b7280;font-size:0.95rem;line-height:1.8;margin-bottom:28px;}
+.feature-list{list-style:none;display:flex;flex-direction:column;gap:12px;}
+.feature-list li{display:flex;align-items:center;gap:12px;font-size:0.9rem;color:#aab4c4;}
+.feature-list li::before{content:'';width:8px;height:8px;background:#1b6fe8;border-radius:50%;flex-shrink:0;}
+
+/* FAKE PLUGIN UI */
+.plugin-mockup{background:#0d1828;border:1px solid rgba(27,111,232,0.2);border-radius:12px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.5);}
+.plugin-header{background:#1b6fe8;padding:14px 18px;font-family:'Orbitron',monospace;font-weight:700;font-size:0.9rem;display:flex;align-items:center;gap:8px;}
+.plugin-chat{padding:14px;display:flex;flex-direction:column;gap:10px;min-height:260px;}
+.msg{padding:10px 14px;border-radius:10px;font-size:0.78rem;line-height:1.6;max-width:85%;}
+.msg.ai{background:#101e33;color:#aab4c4;align-self:flex-start;}
+.msg.user{background:#1b6fe8;color:white;align-self:flex-end;}
+.msg.success{background:#0a2a1a;color:#4ade80;border:1px solid rgba(74,222,128,0.2);align-self:flex-start;}
+.plugin-input{display:flex;gap:8px;padding:10px 14px;border-top:1px solid rgba(27,111,232,0.1);}
+.plugin-input-box{flex:1;background:#0a1525;border:1px solid rgba(27,111,232,0.2);border-radius:6px;padding:8px 12px;color:#6b7280;font-size:0.78rem;}
+.plugin-send{background:#1b6fe8;color:white;border:none;border-radius:6px;padding:8px 14px;font-size:0.75rem;font-weight:700;cursor:pointer;}
+
+/* HOW IT WORKS */
+.how{position:relative;z-index:2;padding:80px 60px;}
+.section-header{text-align:center;margin-bottom:60px;}
+.section-tag{display:inline-block;font-size:0.72rem;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:#1b6fe8;margin-bottom:16px;}
+.section-header h2{font-family:'Orbitron',monospace;font-size:clamp(1.6rem,3.5vw,2.5rem);font-weight:900;}
+.steps-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px;max-width:1000px;margin:0 auto;}
+.step-card{background:#0a1525;border:1px solid rgba(27,111,232,0.15);border-radius:12px;padding:28px;text-align:center;}
+.step-num{font-family:'Orbitron',monospace;font-size:2.5rem;font-weight:900;color:#1b6fe8;margin-bottom:12px;opacity:0.8;}
+.step-card h4{font-size:0.95rem;font-weight:700;margin-bottom:8px;}
+.step-card p{font-size:0.78rem;color:#6b7280;line-height:1.6;}
+
+/* COMMANDS */
+.commands{position:relative;z-index:2;padding:80px 60px;background:#08111e;}
+.commands-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;max-width:1100px;margin:0 auto;}
+.cmd-card{background:#0a1525;border:1px solid rgba(27,111,232,0.1);border-radius:10px;padding:20px;}
+.cmd-card:hover{border-color:rgba(27,111,232,0.4);}
+.cmd-tag{display:inline-block;background:rgba(27,111,232,0.1);color:#47a3ff;font-size:0.65rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;padding:3px 10px;border-radius:100px;margin-bottom:10px;}
+.cmd-title{font-family:'Orbitron',monospace;font-size:0.85rem;font-weight:700;margin-bottom:8px;}
+.cmd-examples{display:flex;flex-direction:column;gap:5px;}
+.cmd-ex{font-size:0.75rem;color:#6b7280;background:#060d1f;padding:5px 10px;border-radius:6px;border-left:2px solid #1b6fe8;}
+
+/* INSTALL */
+.install{position:relative;z-index:2;padding:80px 60px;}
+.install-box{max-width:700px;margin:0 auto;background:#0a1525;border:1px solid rgba(27,111,232,0.2);border-radius:16px;padding:50px 48px;text-align:center;}
+.install-box h2{font-family:'Orbitron',monospace;font-size:1.8rem;font-weight:900;margin-bottom:14px;}
+.install-box p{color:#6b7280;font-size:0.9rem;line-height:1.7;margin-bottom:32px;}
+.install-steps{display:flex;flex-direction:column;gap:12px;text-align:left;margin-bottom:32px;}
+.install-step{display:flex;align-items:flex-start;gap:14px;background:#060d1f;padding:14px;border-radius:8px;}
+.install-step-num{width:26px;height:26px;background:#1b6fe8;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;flex-shrink:0;}
+.install-step p{font-size:0.83rem;color:#aab4c4;line-height:1.5;}
+.install-step code{background:rgba(27,111,232,0.1);color:#47a3ff;padding:1px 6px;border-radius:4px;font-size:0.8rem;}
+
+footer{position:relative;z-index:2;padding:36px 60px;border-top:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+footer p{font-size:0.78rem;color:#6b7280;}
+
+@media(max-width:768px){
+  nav{padding:16px 24px;} .nav-links{display:none;}
+  .preview-inner{grid-template-columns:1fr;}
+  .preview,.how,.commands,.install,.hero{padding:60px 24px;}
+  .install-box{padding:36px 24px;}
+  footer{flex-direction:column;text-align:center;padding:28px 24px;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">BloxFR<span>.</span>AI</div>
+  <ul class="nav-links">
+    <li><a href="#how">How it works</a></li>
+    <li><a href="#commands">Commands</a></li>
+    <li><a href="#install">Download</a></li>
+    <li><a href="#install" class="nav-cta">Get Plugin</a></li>
+  </ul>
+</nav>
+
+<section class="hero">
+  <div class="hero-glow"></div>
+  <div>
+    <div class="hero-badge"><span class="badge-dot"></span>Roblox Studio Plugin</div>
+    <h1>Build games with<br><span>AI assistance</span></h1>
+    <p>Type what you want. BloxFR AI writes the scripts, builds the models, sets the lighting and organizes your workspace — instantly.</p>
+    <div class="hero-btns">
+      <a href="#install" class="btn-primary">Download Plugin →</a>
+      <a href="#how" class="btn-secondary">See How It Works</a>
+    </div>
+  </div>
+</section>
+
+<section class="preview">
+  <div class="preview-inner">
+    <div class="preview-text">
+      <h2>Your AI<br><span>game builder</span></h2>
+      <p>Just type what you need in plain text. BloxFR AI understands what you want and executes it directly inside Roblox Studio — no coding needed.</p>
+      <ul class="feature-list">
+        <li>Generates working Lua scripts instantly</li>
+        <li>Creates and places 3D parts & models</li>
+        <li>Sets lighting presets (day, night, sunset, fog)</li>
+        <li>Organizes Workspace into folders</li>
+        <li>Works inside Roblox Studio as a docked panel</li>
+      </ul>
+    </div>
+    <div class="plugin-mockup">
+      <div class="plugin-header">⚡ BloxFR AI</div>
+      <div class="plugin-chat">
+        <div class="msg ai">👋 Dobrodošao! Napiši što želiš napraviti u svom Roblox projektu.</div>
+        <div class="msg user">napravi kill brick</div>
+        <div class="msg success">✅ Kill brick kreiran!<br>Crveni Part s KillScript dodan u Workspace. Ubija igrača na dodir.</div>
+        <div class="msg user">leaderstats skripta</div>
+        <div class="msg success">✅ LeaderstatsScript kreiran u ServerScriptService!<br>Sadrži: Money i Coins za svakog igrača.</div>
+        <div class="msg user">night lighting</div>
+        <div class="msg success">✅ Night lighting postavljen!<br>Tamna noćna atmosfera aktivirana.</div>
+      </div>
+      <div class="plugin-input">
+        <div class="plugin-input-box">Napiši što želiš napraviti...</div>
+        <button class="plugin-send">Send</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="how" id="how">
+  <div class="section-header">
+    <div class="section-tag">// How it works</div>
+    <h2>3 simple steps</h2>
+  </div>
+  <div class="steps-grid">
+    <div class="step-card"><div class="step-num">1</div><h4>Install Plugin</h4><p>Download the .lua file and install it in Roblox Studio via Plugins menu.</p></div>
+    <div class="step-card"><div class="step-num">2</div><h4>Type Your Request</h4><p>Type what you want in plain text. "make a kill brick", "leaderstats script", "night lighting".</p></div>
+    <div class="step-card"><div class="step-num">3</div><h4>Done!</h4><p>BloxFR AI executes your request instantly inside Studio. No copy-paste needed.</p></div>
+  </div>
+</section>
+
+<section class="commands" id="commands">
+  <div class="section-header">
+    <div class="section-tag">// Commands</div>
+    <h2>What can it do?</h2>
+  </div>
+  <div class="commands-grid">
+    <div class="cmd-card">
+      <span class="cmd-tag">Scripts</span>
+      <div class="cmd-title">Lua Script Generator</div>
+      <div class="cmd-examples">
+        <div class="cmd-ex">"leaderstats skripta"</div>
+        <div class="cmd-ex">"door skripta"</div>
+        <div class="cmd-ex">"speed script"</div>
+        <div class="cmd-ex">"kill brick script"</div>
+        <div class="cmd-ex">"shop script"</div>
+      </div>
+    </div>
+    <div class="cmd-card">
+      <span class="cmd-tag">Models</span>
+      <div class="cmd-title">3D Model Builder</div>
+      <div class="cmd-examples">
+        <div class="cmd-ex">"napravi toranj"</div>
+        <div class="cmd-ex">"napravi zid"</div>
+        <div class="cmd-ex">"napravi pod"</div>
+        <div class="cmd-ex">"napravi platforme"</div>
+      </div>
+    </div>
+    <div class="cmd-card">
+      <span class="cmd-tag">Lighting</span>
+      <div class="cmd-title">Lighting Presets</div>
+      <div class="cmd-examples">
+        <div class="cmd-ex">"day lighting"</div>
+        <div class="cmd-ex">"night lighting"</div>
+        <div class="cmd-ex">"sunset lighting"</div>
+        <div class="cmd-ex">"fog efekt"</div>
+      </div>
+    </div>
+    <div class="cmd-card">
+      <span class="cmd-tag">Workspace</span>
+      <div class="cmd-title">Organization</div>
+      <div class="cmd-examples">
+        <div class="cmd-ex">"organizi workspace"</div>
+        <div class="cmd-ex">"sredi workspace"</div>
+        <div class="cmd-ex">"obrisi sve"</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="install" id="install">
+  <div class="install-box">
+    <h2>Install Plugin</h2>
+    <p>Free to use. Download the plugin file and install it in Roblox Studio in seconds.</p>
+    <div class="install-steps">
+      <div class="install-step"><div class="install-step-num">1</div><p>Download <code>BloxFR_Plugin.lua</code> from the button below</p></div>
+      <div class="install-step"><div class="install-step-num">2</div><p>Open Roblox Studio → <code>Plugins</code> → <code>Plugins Folder</code></p></div>
+      <div class="install-step"><div class="install-step-num">3</div><p>Move the file into the plugins folder and restart Studio</p></div>
+      <div class="install-step"><div class="install-step-num">4</div><p>Click <code>⚡ BloxFR AI</code> button in the toolbar to open!</p></div>
+    </div>
+    <a href="BloxFR_Plugin.lua" download class="btn-primary" style="display:inline-block;">⬇ Download BloxFR_Plugin.lua</a>
+  </div>
+</section>
+
+<footer>
+  <div class="logo">BloxFR<span style="color:#1b6fe8">.</span>AI</div>
+  <p>© 2026 BloxFR.AI — Free Roblox Studio Plugin</p>
+  <p>Not affiliated with Roblox Corporation.</p>
+</footer>
+
+</body>
+</html>
