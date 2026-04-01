@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LuaForge — AI Code Tool for Roblox</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --surface2: #1a1a26;
+    --border: rgba(255,255,255,0.08);
+    --accent: #f5c842;
+    --accent2: #ff6b35;
+    --text: #f0f0f8;
+    --muted: #888899;
+    --green: #4ade80;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* ---- NAV ---- */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1rem 2.5rem;
+    background: rgba(10,10,15,0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  .logo {
+    display: flex; align-items: center; gap: 0.5rem;
+    font-family: 'Syne', sans-serif; font-size: 1.3rem; font-weight: 800;
+    color: var(--text); text-decoration: none;
+  }
+  .logo-icon {
+    width: 32px; height: 32px; background: var(--accent);
+    border-radius: 8px; display: flex; align-items: center;
+    justify-content: center; font-size: 18px;
+  }
+  nav .links { display: flex; gap: 2rem; align-items: center; }
+  nav a { color: var(--muted); text-decoration: none; font-size: 0.9rem; transition: color 0.2s; }
+  nav a:hover { color: var(--text); }
+  .btn-primary {
+    background: var(--accent); color: #000; padding: 0.5rem 1.25rem;
+    border-radius: 8px; font-weight: 500; font-size: 0.9rem;
+    text-decoration: none; transition: opacity 0.2s;
+  }
+  .btn-primary:hover { opacity: 0.85; color: #000; }
+
+  /* ---- HERO ---- */
+  .hero {
+    min-height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    padding: 6rem 2rem 4rem;
+    position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; top: -20%; left: 50%; transform: translateX(-50%);
+    width: 800px; height: 800px;
+    background: radial-gradient(circle, rgba(245,200,66,0.08) 0%, transparent 65%);
+    pointer-events: none;
+  }
+  .hero-inner { max-width: 900px; text-align: center; position: relative; }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    background: rgba(245,200,66,0.1); border: 1px solid rgba(245,200,66,0.2);
+    color: var(--accent); padding: 0.3rem 0.9rem;
+    border-radius: 99px; font-size: 0.8rem; font-weight: 500; margin-bottom: 1.5rem;
+  }
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2.8rem, 7vw, 5.5rem);
+    font-weight: 800; line-height: 1.05; letter-spacing: -0.03em;
+    margin-bottom: 1.25rem;
+  }
+  .hero h1 em { color: var(--accent); font-style: normal; }
+  .hero p {
+    font-size: 1.15rem; color: var(--muted); max-width: 560px;
+    margin: 0 auto 2.5rem; line-height: 1.7;
+  }
+  .hero-btns { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+  .btn-big {
+    padding: 0.85rem 2rem; border-radius: 10px; font-size: 1rem;
+    font-weight: 500; text-decoration: none; transition: all 0.2s;
+  }
+  .btn-yellow { background: var(--accent); color: #000; }
+  .btn-yellow:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(245,200,66,0.25); }
+  .btn-ghost {
+    border: 1px solid var(--border); color: var(--text);
+    background: var(--surface);
+  }
+  .btn-ghost:hover { border-color: rgba(255,255,255,0.2); }
+
+  /* ---- STATS ---- */
+  .stats {
+    display: flex; justify-content: center; gap: 3rem;
+    padding: 2rem 2rem 4rem; flex-wrap: wrap;
+  }
+  .stat { text-align: center; }
+  .stat strong {
+    display: block; font-family: 'Syne', sans-serif;
+    font-size: 2rem; font-weight: 800; color: var(--accent);
+  }
+  .stat span { font-size: 0.85rem; color: var(--muted); }
+
+  /* ---- HOW IT WORKS ---- */
+  section { padding: 5rem 2rem; max-width: 1100px; margin: 0 auto; }
+  .section-label {
+    font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--accent); font-weight: 600; margin-bottom: 0.75rem;
+  }
+  h2 {
+    font-family: 'Syne', sans-serif; font-size: clamp(1.8rem, 4vw, 2.8rem);
+    font-weight: 800; margin-bottom: 1rem; letter-spacing: -0.02em;
+  }
+  .steps {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.5rem; margin-top: 3rem;
+  }
+  .step {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 16px; padding: 1.75rem;
+    transition: border-color 0.2s;
+  }
+  .step:hover { border-color: rgba(245,200,66,0.3); }
+  .step-num {
+    width: 36px; height: 36px; background: rgba(245,200,66,0.12);
+    border-radius: 10px; display: flex; align-items: center; justify-content: center;
+    font-family: 'Syne', sans-serif; font-weight: 800; color: var(--accent);
+    font-size: 0.95rem; margin-bottom: 1rem;
+  }
+  .step h3 { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; margin-bottom: 0.5rem; }
+  .step p { font-size: 0.88rem; color: var(--muted); line-height: 1.6; }
+
+  /* ---- CREDITS ---- */
+  .pricing-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.25rem; margin-top: 3rem;
+  }
+  .plan {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 16px; padding: 2rem; position: relative;
+    transition: transform 0.2s;
+  }
+  .plan:hover { transform: translateY(-4px); }
+  .plan.featured {
+    border-color: var(--accent); background: var(--surface2);
+  }
+  .plan-badge {
+    position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+    background: var(--accent); color: #000; padding: 0.2rem 0.9rem;
+    border-radius: 99px; font-size: 0.75rem; font-weight: 700;
+    white-space: nowrap;
+  }
+  .plan-name { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.1rem; margin-bottom: 0.5rem; }
+  .plan-price {
+    font-family: 'Syne', sans-serif; font-size: 2.2rem; font-weight: 800;
+    margin-bottom: 0.25rem;
+  }
+  .plan-price span { font-size: 1rem; font-weight: 400; color: var(--muted); }
+  .plan-credits {
+    font-size: 0.85rem; color: var(--muted); margin-bottom: 1.5rem;
+    padding-bottom: 1.5rem; border-bottom: 1px solid var(--border);
+  }
+  .plan-features { list-style: none; display: flex; flex-direction: column; gap: 0.6rem; }
+  .plan-features li {
+    font-size: 0.875rem; display: flex; align-items: center; gap: 0.5rem;
+  }
+  .plan-features li::before {
+    content: ''; width: 16px; height: 16px; flex-shrink: 0;
+    background: rgba(74,222,128,0.15); border-radius: 50%;
+    border: 1.5px solid var(--green);
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  .plan-btn {
+    display: block; text-align: center; margin-top: 1.5rem;
+    padding: 0.7rem; border-radius: 8px; font-weight: 500;
+    font-size: 0.9rem; text-decoration: none; transition: all 0.2s;
+  }
+  .plan-btn-ghost {
+    border: 1px solid var(--border); color: var(--text);
+    background: transparent;
+  }
+  .plan-btn-ghost:hover { border-color: rgba(255,255,255,0.25); }
+  .plan-btn-solid { background: var(--accent); color: #000; }
+  .plan-btn-solid:hover { opacity: 0.85; }
+
+  /* ---- PLUGIN PREVIEW ---- */
+  .plugin-section {
+    padding: 5rem 2rem; max-width: 1100px; margin: 0 auto;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center;
+  }
+  @media (max-width: 768px) {
+    .plugin-section { grid-template-columns: 1fr; gap: 2rem; }
+  }
+  .plugin-mockup {
+    background: #1c1c24; border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 14px; padding: 1.25rem; font-family: monospace;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+  }
+  .mockup-bar {
+    display: flex; align-items: center; gap: 0.5rem;
+    margin-bottom: 1rem; padding-bottom: 0.75rem;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+  }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot-r { background: #ff5f57; }
+  .dot-y { background: #febc2e; }
+  .dot-g { background: #28c840; }
+  .mockup-title {
+    flex: 1; text-align: center; font-size: 0.75rem;
+    color: var(--muted); font-family: 'DM Sans', sans-serif;
+  }
+  .plugin-logo-row {
+    display: flex; align-items: center; gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  .plugin-lemon {
+    width: 36px; height: 36px; background: var(--accent);
+    border-radius: 10px; display: flex; align-items: center;
+    justify-content: center; font-size: 20px;
+  }
+  .plugin-ver { font-size: 0.8rem; color: var(--muted); font-family: 'DM Sans', sans-serif; }
+  .plugin-btns { display: flex; gap: 0.5rem; margin-left: auto; }
+  .p-btn {
+    padding: 0.4rem 1rem; border-radius: 6px; font-size: 0.8rem;
+    font-family: 'DM Sans', sans-serif; cursor: pointer; border: none;
+    font-weight: 500;
+  }
+  .p-btn-green { background: #22c55e; color: #000; }
+  .p-btn-gray { background: #2a2a38; color: var(--muted); }
+  .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #ef4444; }
+  .plugin-msg {
+    font-size: 0.8rem; color: var(--muted); text-align: center;
+    font-family: 'DM Sans', sans-serif; padding: 0.5rem 0;
+  }
+  .plugin-log-btn {
+    display: block; margin: 0.75rem auto 0;
+    padding: 0.3rem 0.75rem; border: 1px solid var(--border);
+    background: transparent; color: var(--muted); border-radius: 5px;
+    font-size: 0.75rem; cursor: pointer; font-family: 'DM Sans', sans-serif;
+  }
+
+  /* ---- FOOTER ---- */
+  footer {
+    border-top: 1px solid var(--border); padding: 2rem 2.5rem;
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap; gap: 1rem;
+    color: var(--muted); font-size: 0.85rem;
+  }
+  footer a { color: var(--muted); text-decoration: none; }
+  footer a:hover { color: var(--text); }
+
+  /* ---- ANIMATIONS ---- */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .hero-inner > * {
+    animation: fadeUp 0.7s ease both;
+  }
+  .hero-badge { animation-delay: 0.1s; }
+  .hero h1 { animation-delay: 0.2s; }
+  .hero p { animation-delay: 0.3s; }
+  .hero-btns { animation-delay: 0.4s; }
+
+  /* ---- CTA BAND ---- */
+  .cta-band {
+    background: var(--surface); border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 4rem 2rem; text-align: center;
+  }
+  .cta-band h2 { margin-bottom: 1rem; }
+  .cta-band p { color: var(--muted); margin-bottom: 2rem; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="logo">
+    <div class="logo-icon">🍋</div>
+    LuaForge
+  </a>
+  <div class="links">
+    <a href="#how">How it works</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#plugin">Plugin</a>
+    <a href="dashboard.html" class="btn-primary">Dashboard</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-badge">✦ AI-powered Roblox development</div>
+    <h1>Build Roblox games<br>with <em>AI code</em></h1>
+    <p>Describe any game mechanic in plain English. LuaForge generates working Lua code and injects it directly into Roblox Studio through our plugin.</p>
+    <div class="hero-btns">
+      <a href="dashboard.html" class="btn-big btn-yellow">Start for free →</a>
+      <a href="#how" class="btn-big btn-ghost">See how it works</a>
+    </div>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="stats">
+  <div class="stat"><strong>3</strong><span>free credits daily</span></div>
+  <div class="stat"><strong>1-click</strong><span>inject to Studio</span></div>
+  <div class="stat"><strong>100%</strong><span>Roblox Lua output</span></div>
+</div>
+
+<!-- HOW IT WORKS -->
+<section id="how">
+  <p class="section-label">How it works</p>
+  <h2>From idea to<br>running code in seconds</h2>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <h3>Install the plugin</h3>
+      <p>Download the LuaForge plugin from Roblox Studio's plugin marketplace and log in with your Roblox account.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <h3>Open a project</h3>
+      <p>Open any Roblox Studio project. Click Connect in the plugin and it links to your LuaForge dashboard automatically.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <h3>Describe your mechanic</h3>
+      <p>Type what you want — "Make a double jump with particles" — and the AI writes the full Lua script.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <h3>Code injects instantly</h3>
+      <p>With one click the generated code is placed directly into your project. No copy-pasting needed.</p>
+    </div>
+  </div>
+</section>
+
+<!-- PLUGIN PREVIEW -->
+<div class="plugin-section" id="plugin">
+  <div>
+    <p class="section-label">The plugin</p>
+    <h2>Works inside<br>Roblox Studio</h2>
+    <p style="color:var(--muted); margin-bottom:1.5rem;">The LuaForge plugin sits right inside Roblox Studio. Connect once and every AI response goes straight into your game — no switching windows.</p>
+    <a href="#" class="btn-big btn-yellow" style="display:inline-block;">Download plugin →</a>
+  </div>
+  <div class="plugin-mockup">
+    <div class="mockup-bar">
+      <div class="dot dot-r"></div>
+      <div class="dot dot-y"></div>
+      <div class="dot dot-g"></div>
+      <div class="mockup-title">LuaForge Plugin</div>
+    </div>
+    <div class="plugin-logo-row">
+      <div class="plugin-lemon">🍋</div>
+      <span class="plugin-ver">v1.0.0</span>
+      <div class="plugin-btns">
+        <button class="p-btn p-btn-green">Connect</button>
+        <button class="p-btn p-btn-gray">Status <span class="status-dot" style="display:inline-block;vertical-align:middle;"></span></button>
+      </div>
+    </div>
+    <p class="plugin-msg">Open a project in the browser then press Connect</p>
+    <button class="plugin-log-btn">Logs Off</button>
+  </div>
+</div>
+
+<!-- PRICING -->
+<section id="pricing">
+  <p class="section-label">Credits & pricing</p>
+  <h2>Simple, transparent<br>pricing</h2>
+  <div class="pricing-grid">
+    <div class="plan">
+      <div class="plan-name">Free</div>
+      <div class="plan-price">$0 <span>/ month</span></div>
+      <div class="plan-credits">3 credits per day · resets at midnight</div>
+      <ul class="plan-features">
+        <li>3 AI generations daily</li>
+        <li>Plugin access</li>
+        <li>Basic Lua support</li>
+        <li>Community Discord</li>
+      </ul>
+      <a href="dashboard.html" class="plan-btn plan-btn-ghost">Get started free</a>
+    </div>
+    <div class="plan featured">
+      <div class="plan-badge">Most popular</div>
+      <div class="plan-name">Builder</div>
+      <div class="plan-price">$4.99 <span>/ month</span></div>
+      <div class="plan-credits">20 credits per day · never expires</div>
+      <ul class="plan-features">
+        <li>20 AI generations daily</li>
+        <li>Priority AI model</li>
+        <li>Code history & checkpoints</li>
+        <li>Plugin access</li>
+        <li>Priority support</li>
+      </ul>
+      <a href="dashboard.html" class="plan-btn plan-btn-solid">Upgrade to Builder</a>
+    </div>
+    <div class="plan">
+      <div class="plan-name">Studio</div>
+      <div class="plan-price">$12.99 <span>/ month</span></div>
+      <div class="plan-credits">Unlimited credits · all features</div>
+      <ul class="plan-features">
+        <li>Unlimited AI generations</li>
+        <li>Fastest AI model</li>
+        <li>Team sharing (up to 3)</li>
+        <li>Advanced Lua modules</li>
+        <li>1-on-1 onboarding</li>
+      </ul>
+      <a href="dashboard.html" class="plan-btn plan-btn-ghost">Go Studio</a>
+    </div>
+  </div>
+</section>
+
+<!-- CTA BAND -->
+<div class="cta-band">
+  <h2>Ready to build faster?</h2>
+  <p>Join thousands of Roblox creators already using LuaForge.</p>
+  <a href="dashboard.html" class="btn-big btn-yellow">Start for free — no credit card needed</a>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div>© 2026 LuaForge · All rights reserved</div>
+  <div style="display:flex;gap:1.5rem;">
+    <a href="#">Terms</a>
+    <a href="#">Privacy</a>
+    <a href="#">Discord</a>
+    <a href="#">Docs</a>
+  </div>
+</footer>
+
+</body>
+</html>
